@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PlayGround — تطبيق المهام</title>
+<style>
+  :root { --bg:#0f172a; --card:#1e293b; --accent:#38bdf8; --accent2:#a78bfa; --text:#f1f5f9; --muted:#94a3b8; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:"Segoe UI",Tahoma,Arial,sans-serif; background:radial-gradient(1200px 600px at 80% -10%,#1e3a8a33,transparent),var(--bg); color:var(--text); min-height:100vh; }
+  header { max-width:960px; margin:0 auto; padding:28px 20px 10px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .logo { font-weight:800; font-size:22px; }
+  .logo span { background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .badge { font-size:12px; color:var(--muted); border:1px solid #334155; padding:6px 12px; border-radius:999px; }
+  main { max-width:960px; margin:0 auto; padding:10px 20px 40px; display:grid; grid-template-columns:1.1fr .9fr; gap:18px; }
+  @media (max-width:800px){ main{grid-template-columns:1fr;} }
+  .hero { background:linear-gradient(180deg,#1e293b,#0f172a); border:1px solid #334155; border-radius:18px; padding:28px; }
+  .hero h1 { margin:0 0 10px; font-size:32px; line-height:1.3; }
+  .hero p { margin:0 0 18px; color:var(--muted); line-height:1.9; }
+  .stats { display:flex; gap:10px; margin-top:16px; }
+  .stat { flex:1; background:#0b1220; border:1px solid #334155; border-radius:12px; padding:12px; text-align:center; }
+  .stat b { display:block; font-size:22px; }
+  .stat small { color:var(--muted); }
+  .card { background:var(--card); border:1px solid #334155; border-radius:18px; padding:20px; }
+  .card h2 { margin:0 0 12px; font-size:18px; }
+  .row { display:flex; gap:8px; }
+  input[type=text]{ flex:1; background:#0b1220; border:1px solid #334155; color:var(--text); border-radius:10px; padding:12px; font-size:15px; }
+  button { background:linear-gradient(90deg,var(--accent),var(--accent2)); border:0; color:#04121f; font-weight:800; border-radius:10px; padding:0 18px; cursor:pointer; font-size:15px; }
+  ul { list-style:none; margin:16px 0 0; padding:0; display:flex; flex-direction:column; gap:8px; }
+  li { display:flex; align-items:center; gap:10px; background:#0b1220; border:1px solid #334155; border-radius:10px; padding:10px 12px; }
+  li.done span { text-decoration:line-through; color:var(--muted); }
+  li span { flex:1; }
+  li small { color:var(--muted); }
+  .del { background:#334155; color:#fff; padding:6px 10px; border-radius:8px; font-size:13px; }
+  footer { max-width:960px; margin:0 auto; padding:0 20px 30px; color:var(--muted); font-size:13px; text-align:center; }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">PlayGround <span>• ساحة اللعب</span></div>
+  <div class="badge">تطبيق يعمل دون إنترنت — v1.0</div>
+</header>
+<main>
+  <section class="hero">
+    <h1>أهلاً بك في تطبيق PlayGround</h1>
+    <p>تطبيق مهام سريع باللغة العربية: أضف مهامك، حدد المنجز، واحفظ كل شيء في متصفحك. يعمل على الجوال وسطح المكتب بدون أي خادم خارجي.</p>
+    <div class="stats">
+      <div class="stat"><b id="stTotal">0</b><small>إجمالي المهام</small></div>
+      <div class="stat"><b id="stDone">0</b><small>منجزة</small></div>
+      <div class="stat"><b id="stLeft">0</b><small>متبقية</small></div>
+    </div>
+  </section>
+  <section class="card">
+    <h2>قائمة المهام</h2>
+    <div class="row">
+      <input id="inp" type="text" placeholder="اكتب مهمة جديدة… ثم اضغط إضافة" maxlength="120" />
+      <button id="add">إضافة</button>
+    </div>
+    <ul id="list"></ul>
+  </section>
+</main>
+<footer>صُنع في PlayGround — يعمل بالكامل داخل المتصفح • افتح المعاينة والتقط صورة لسطح المكتب والجوال</footer>
+<script>
+(function(){
+  var KEY='playground-tasks-v1';
+  var list=document.getElementById('list'), inp=document.getElementById('inp');
+  var tasks=[];
+  try{ tasks=JSON.parse(localStorage.getItem(KEY)||'[]'); }catch(e){ tasks=[]; }
+  if(!tasks.length){ tasks=[{t:'استكشف التطبيق والتقط صورة للشاشة',d:false},{t:'أضف مهمتك الأولى من الأعلى',d:false},{t:'حدد مهمة كمنجزة بالضغط عليها',d:true}]; save(); }
+  function save(){ try{localStorage.setItem(KEY,JSON.stringify(tasks));}catch(e){} }
+  function render(){
+    list.innerHTML='';
+    tasks.forEach(function(it,i){
+      var li=document.createElement('li'); if(it.d) li.className='done';
+      var cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!it.d;
+      cb.onchange=function(){ tasks[i].d=cb.checked; save(); render(); };
+      var sp=document.createElement('span'); sp.textContent=it.t; sp.onclick=function(){ tasks[i].d=!tasks[i].d; save(); render(); };
+      var del=document.createElement('button'); del.className='del'; del.textContent='حذف';
+      del.onclick=function(){ tasks.splice(i,1); save(); render(); };
+      li.appendChild(cb); li.appendChild(sp); li.appendChild(del); list.appendChild(li);
+    });
+    document.getElementById('stTotal').textContent=tasks.length;
+    document.getElementById('stDone').textContent=tasks.filter(function(x){return x.d}).length;
+    document.getElementById('stLeft').textContent=tasks.filter(function(x){return !x.d}).length;
+  }
+  function add(){
+    var v=(inp.value||'').trim(); if(!v) return;
+    tasks.unshift({t:v,d:false}); inp.value=''; save(); render();
+  }
+  document.getElementById('add').onclick=add;
+  inp.onkeydown=function(e){ if(e.key==='Enter') add(); };
+  render();
+})();
+</script>
+</body>
+</html>
